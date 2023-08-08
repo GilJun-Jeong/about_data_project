@@ -510,7 +510,7 @@ class Ui_MainWindow(object):
         self.pb_location.setText(_translate("MainWindow", "위치 조건"))
         self.pb_scan_all.setText(_translate("MainWindow", "분석 결과 보기"))
         self.label_13.setText(_translate("MainWindow", "원하는 구와 동 선택"))
-        self.le_money.setPlaceholderText(_translate("MainWindow", "금액 입력(단위 : 만 원)"))
+        self.le_money.setPlaceholderText(_translate("MainWindow", "금액 입력 단위 : 만 원"))
         self.label_11.setText(_translate("MainWindow", "최대 투자 금액 입력"))
         self.pb_scan_money.setText(_translate("MainWindow", "검색"))
         self.label_12.setText(_translate("MainWindow", "분석을 보고 싶은 주소를 입력"))

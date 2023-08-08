@@ -545,7 +545,7 @@ font-weight : bold;
                 <string notr="true">background-color : white;</string>
                </property>
                <property name="placeholderText">
-                <string>금액 입력(단위 : 만 원)</string>
+                <string>금액 입력 단위 : 만 원</string>
                </property>
               </widget>
               <widget class="QLabel" name="label_11">

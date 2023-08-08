@@ -1,11 +1,13 @@
 import sys
-from socket import *
+import requests
 import threading
 import ui.mainUi
 import json
 import time
-from temp_data import Temp
+
+from socket import *
 from PyQt5.QtWidgets import QWidget, QApplication, QDialog, QMainWindow
+from temp_data import Temp
 
 
 class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
@@ -88,10 +90,6 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                 self.client_socket = None
                 self.information['connect'] = False
 
-            elif command == 'error':
-                pass
-            elif command == 'update':
-                self.classcenterframe.theSignal.emit(' '.join(parsed[1:]).strip(), False)
         except:
             self.file_receive(p)
 
@@ -169,11 +167,4 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.sw_condition.setCurrentWidget(self.pg_scan)
         self.sw_scan.setCurrentWidget(self.pg_all)
 
-
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    myWindow = ClientOp()
-    myWindow.show()
-    app.exec()
+    # def scan_map
