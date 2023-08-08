@@ -4,6 +4,5 @@ class TempData:
     list_split_2 = chr(3)
 
     clients = []
-    transfer = []
     max_clients = 20
     server_port = 9999

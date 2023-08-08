@@ -1,5 +1,6 @@
 import temp_data
 import threading
+import os
 
 
 class Client(temp_data.TempData):
@@ -46,3 +47,24 @@ class Client(temp_data.TempData):
                 self._exist = False
                 # self.input_server_log('logout', self._client_name)
                 self._client_socket.close()
+        elif command == 'file':
+            name = parsed[1].strip()
+            self.send_file(name)
+
+    def send_file(self, name):
+        path = f'../db/send/{name}'
+        file_size = self.get_file_size(path)
+        self.send_to_client('size' + self.header_split + file_size)
+        with open(path, 'rb') as file:
+            try:
+                data = file.read()
+                self._client_socket.sendall(data)
+                file.close()
+                print('file sent')
+
+            except Exception as ex:
+                print(ex)
+
+    def get_file_size(self, path):
+        file_size = os.path.getsize(path)
+        return str(file_size)
