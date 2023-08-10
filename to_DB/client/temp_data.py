@@ -5,4 +5,6 @@ class Temp:
     list_split_2 = chr(3)
     file_size = 1024
     connected = False
-
+    script_key = '802bea2aa3a8eb460457e73b2078b949'
+    url = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey='
+    gu_list = []

@@ -1,11 +1,12 @@
-from socket import *
 import threading
-import temp_data
 import client
 import atexit
 
+from socket import *
+from temp_data import TempData
 
-class MultiServer(temp_data.TempData):
+
+class MultiServer(TempData):
     def __init__(self):
         self._max_clients = self.max_clients
 
@@ -32,14 +33,15 @@ class MultiServer(temp_data.TempData):
         del client_
 
     def server_member(self):
-        return self._max_clients == len(temp_data.TempData.clients)
+        return self._max_clients == len(TempData.clients)
 
     def connections(self):
         while True:
             if not self.server_member():
                 conn_socket, addr = self._server_socket.accept()
-                new_client = client.Client(f'temp{len(temp_data.TempData.clients)+1}', conn_socket, addr)
-                temp_data.TempData.clients.append(new_client)
+                new_client = client.Client(f'temp{len(TempData.clients)+1}', conn_socket, addr)
+                TempData.clients.append(new_client)
+                print('connect')
             else:
                 conn_socket, addr = self._server_socket.accept()
                 conn_socket.send(('error' + self.header_split + "Server is full").encode('UTF-8'))

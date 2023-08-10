@@ -1,9 +1,11 @@
-import temp_data
 import threading
 import os
 
+from read_db import InteractionToDB
+from temp_data import TempData
 
-class Client(temp_data.TempData):
+
+class Client(TempData, InteractionToDB):
 
     def __init__(self, name, connection, address):
         self._client_name = name
@@ -11,7 +13,7 @@ class Client(temp_data.TempData):
         self._client_address = address
         self._exist = True
 
-        receiving_thread = threading.Thread(target=self.receive_from_client)
+        receiving_thread = threading.Thread(target=self.receive_from_client, daemon=True)
         receiving_thread.start()
 
     def get_name(self):
@@ -45,11 +47,18 @@ class Client(temp_data.TempData):
         if command == 'disconnect':
             if self._exist:
                 self._exist = False
-                # self.input_server_log('logout', self._client_name)
                 self._client_socket.close()
+
         elif command == 'file':
             name = parsed[1].strip()
             self.send_file(name)
+
+        elif command == 'district':
+            self.get_district()
+            district = self.district_list
+            print(self.district_list)
+            self.send_to_client('district' + self.header_split + district)
+
 
     def send_file(self, name):
         path = f'../db/send/{name}'
@@ -68,3 +77,6 @@ class Client(temp_data.TempData):
     def get_file_size(self, path):
         file_size = os.path.getsize(path)
         return str(file_size)
+
+    def get_district(self):
+        data = self.get_gu()

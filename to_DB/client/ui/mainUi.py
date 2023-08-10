@@ -115,24 +115,21 @@ class Ui_MainWindow(object):
         self.widget_14.setGeometry(QtCore.QRect(20, 30, 740, 360))
         self.widget_14.setStyleSheet("")
         self.widget_14.setObjectName("widget_14")
-        self.widget_15 = QtWidgets.QWidget(self.widget_14)
-        self.widget_15.setGeometry(QtCore.QRect(0, 0, 360, 360))
-        self.widget_15.setObjectName("widget_15")
-        self.sw_condition = QtWidgets.QStackedWidget(self.widget_15)
-        self.sw_condition.setGeometry(QtCore.QRect(0, 0, 360, 360))
+        self.sw_condition = QtWidgets.QStackedWidget(self.widget_14)
+        self.sw_condition.setGeometry(QtCore.QRect(0, 0, 740, 360))
         self.sw_condition.setObjectName("sw_condition")
         self.pg_scan = QtWidgets.QWidget()
         self.pg_scan.setObjectName("pg_scan")
         self.widget_16 = QtWidgets.QWidget(self.pg_scan)
-        self.widget_16.setGeometry(QtCore.QRect(0, 0, 360, 60))
+        self.widget_16.setGeometry(QtCore.QRect(0, 0, 360, 340))
         self.widget_16.setStyleSheet("background-color : #ffce32")
         self.widget_16.setObjectName("widget_16")
         self.widget_17 = QtWidgets.QWidget(self.widget_16)
-        self.widget_17.setGeometry(QtCore.QRect(0, 10, 360, 40))
+        self.widget_17.setGeometry(QtCore.QRect(0, 10, 360, 320))
         self.widget_17.setStyleSheet("background-color : #009223")
         self.widget_17.setObjectName("widget_17")
         self.pb_all = QtWidgets.QPushButton(self.widget_17)
-        self.pb_all.setGeometry(QtCore.QRect(15, 5, 100, 30))
+        self.pb_all.setGeometry(QtCore.QRect(30, 30, 300, 50))
         self.pb_all.setStyleSheet("background-color : #ffce32;\n"
 "border : 0px;\n"
 "border-radius : 10%;\n"
@@ -141,7 +138,7 @@ class Ui_MainWindow(object):
 "")
         self.pb_all.setObjectName("pb_all")
         self.pb_money = QtWidgets.QPushButton(self.widget_17)
-        self.pb_money.setGeometry(QtCore.QRect(130, 5, 100, 30))
+        self.pb_money.setGeometry(QtCore.QRect(30, 130, 300, 50))
         self.pb_money.setStyleSheet("background-color : #ffce32;\n"
 "border : 0px;\n"
 "border-radius : 10%;\n"
@@ -150,7 +147,7 @@ class Ui_MainWindow(object):
 "")
         self.pb_money.setObjectName("pb_money")
         self.pb_location = QtWidgets.QPushButton(self.widget_17)
-        self.pb_location.setGeometry(QtCore.QRect(245, 5, 100, 30))
+        self.pb_location.setGeometry(QtCore.QRect(30, 230, 300, 50))
         self.pb_location.setStyleSheet("background-color : #ffce32;\n"
 "border : 0px;\n"
 "border-radius : 10%;\n"
@@ -159,7 +156,7 @@ class Ui_MainWindow(object):
 "")
         self.pb_location.setObjectName("pb_location")
         self.sw_scan = QtWidgets.QStackedWidget(self.pg_scan)
-        self.sw_scan.setGeometry(QtCore.QRect(0, 60, 360, 300))
+        self.sw_scan.setGeometry(QtCore.QRect(370, 20, 360, 300))
         self.sw_scan.setObjectName("sw_scan")
         self.pg_all = QtWidgets.QWidget()
         self.pg_all.setObjectName("pg_all")
@@ -303,11 +300,11 @@ class Ui_MainWindow(object):
 "\n"
 "")
         self.label_25.setObjectName("label_25")
-        self.sw_condition.addWidget(self.pg_realestate)
-        self.wg_scan_map = QtWebEngineWidgets.QWebEngineView(self.widget_14)
+        self.wg_scan_map = QtWebEngineWidgets.QWebEngineView(self.pg_realestate)
         self.wg_scan_map.setGeometry(QtCore.QRect(380, 0, 360, 360))
         self.wg_scan_map.setStyleSheet("background-color : white;")
         self.wg_scan_map.setObjectName("wg_scan_map")
+        self.sw_condition.addWidget(self.pg_realestate)
         self.sw_result.addWidget(self.pg_main_scan)
         self.pg_result = QtWidgets.QWidget()
         self.pg_result.setObjectName("pg_result")

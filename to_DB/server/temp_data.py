@@ -6,3 +6,4 @@ class TempData:
     clients = []
     max_clients = 20
     server_port = 9999
+    district_list = []

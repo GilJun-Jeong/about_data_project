@@ -7,21 +7,8 @@ import time
 
 from socket import *
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtCore import QObject
-from PyQt5.QtWebChannel import QWebChannel
-from geopy.geocoders import Nominatim
 
 from temp_data import Temp
-
-
-class Communicator(QObject):
-    clicked_location = pyqtSignal(str)
-
-    @pyqtSlot()
-    def send_to_python(self, coords):
-        self.clicked_location.emit(coords)
 
 
 class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
@@ -29,9 +16,6 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         super().__init__()
         self.setupUi(self)
 
-        self.communicator = Communicator()
-        self.channel = QWebChannel()
-        self.channel.registerObject('communicator', self.communicator)
         self.connection()
         self.init_signal()
         self.init_widget()
@@ -86,6 +70,8 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
             else:
                 filled_packet = p[:packet_length]
             self.client_socket.send(filled_packet.encode('UTF-8'))
+            print(p)
+            print('sent')
         else:
             pass
 
@@ -112,6 +98,13 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                 self.client_socket = None
                 self.information['connect'] = False
 
+            elif command == 'district':
+                self.district = parsed[:1]
+                for district in self.district:
+                    self.cb_district_data.addItem(district)
+                    self.cb_district_all.addItem(district)
+                    self.cb_district_money.addItem(district)
+
         except:
             self.file_receive(p)
 
@@ -128,6 +121,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
     def start(self):
         self.sw_main.setCurrentWidget(self.pg_data_page)
         self.sw_logo.setCurrentWidget(self.pg_logo_menu)
+        self._send_packet('district' + self.header_split)
 
     def next_page(self, event):
         self.sw_main.setCurrentWidget(self.pg_analysis_page)
@@ -216,10 +210,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                 ''')
 
     def show_scan_map(self):
-        script_key = '802bea2aa3a8eb460457e73b2078b949'
-        url = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey='
-        self.wg_scan_map.page().setWebChannel(self.channel)
-        self.wg_scan_map.setHtml(f'''
+        self.wg_scan_map.setHtml(f"""
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -228,7 +219,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                 <body>
                     <div id="map" style="width: 340px; height: 340px;"></div>
                     <script type="text/javascript" 
-                    src="{url}{script_key}"></script>
+                    src="{self.url}{self.script_key}&libraries=services,clusterer,drawing"></script>
                     <script>
                     var mapContainer = document.getElementById('map'),
                         mapOptions = {{
@@ -236,25 +227,24 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                             level: 8
                         }};
                     var map = new kakao.maps.Map(mapContainer, mapOptions);
-                    var marker = new kakao.maps.Marker(); 
+                    var marker = new kakao.maps.Marker();
+                    
                     marker.setMap(map);
+                    clusterer.setGridSize(100);
+                    clusterer.setMinClusterSize(1);
+                    clusterer.setAverageCenter(true);
+                    clusterer.setMinLevel(7)
                     kakao.maps.event.addListener(map, 'click', function(mouseEvent){{
                             var latlng = mouseEvent.latLng;
+                            map.setCenter(latlng)
                             marker.setPosition(latlng);
-                            communicator.send_to_python(latlng.getLat() + ',' + latlng.getLng());
                         }});
                     </script>
                 </body>
                 </html>
-                ''')
-
-        self.communicator.clicked_location.connect(self.change_geopy)
-
+                """)
 
     def show_map_result(self):
-        script_key = '802bea2aa3a8eb460457e73b2078b949'
-        url = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey='
-
         self.wg_map_result.setHtml(f'''
                 <!DOCTYPE html>
                 <html lang="ko">
@@ -265,23 +255,20 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                     <div id="map" style="width: 720px; height: 300px;"></div>
 
                     <script type="text/javascript" 
-                    src="{url}{script_key}">
+                    src="{self.url}{self.script_key}&libraries=services,clusterer,drawing">
                     </script>
                     <script type="text/javascript">
 
-                    var container = document.getElementById('map');
-                    var options = {{
+                    var container = document.getElementById('map'), 
+                        options = {{
                             center: new kakao.maps.LatLng(37.5665, 126.9780),
-                            level: 8
-                    }};
+                            level: 5
+                        }};
                     var map = new kakao.maps.Map(container, options);
+                    var zoomControl = new kakao.maps.ZoomControl();
+                    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
                     </script>
                 </body>
                 </html>
                 ''')
 
-    def change_geopy(self, coordinate):
-        self.sw_scan.setCurrentWidget(self.pg_location)
-        geolocator = Nominatim(user_agent='bear')
-        location = geolocator.geocode(coordinate)
-        self.le_location.setText(location)
