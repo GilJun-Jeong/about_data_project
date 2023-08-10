@@ -108,7 +108,7 @@ font-weight : bold;</string>
          </property>
         </widget>
        </widget>
-       <widget class="QWidget" name="data_map" native="true">
+       <widget class="QWebEngineView" name="wg_data_map" native="true">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -120,19 +120,6 @@ font-weight : bold;</string>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(255, 255, 255);</string>
         </property>
-        <widget class="QLabel" name="label_15">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>160</y>
-           <width>141</width>
-           <height>61</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>지도</string>
-         </property>
-        </widget>
        </widget>
        <widget class="QWidget" name="widget_9" native="true">
         <property name="geometry">
@@ -804,7 +791,7 @@ font-weight : bold;
            </widget>
           </widget>
          </widget>
-         <widget class="QWidget" name="scan_map" native="true">
+         <widget class="QWebEngineView" name="wg_scan_map" native="true">
           <property name="geometry">
            <rect>
             <x>380</x>
@@ -816,19 +803,6 @@ font-weight : bold;
           <property name="styleSheet">
            <string notr="true">background-color : white;</string>
           </property>
-          <widget class="QLabel" name="label_14">
-           <property name="geometry">
-            <rect>
-             <x>170</x>
-             <y>170</y>
-             <width>56</width>
-             <height>12</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>지도</string>
-           </property>
-          </widget>
          </widget>
         </widget>
        </widget>
@@ -948,7 +922,7 @@ font-weight : bold;</string>
           </widget>
          </widget>
          <widget class="QWidget" name="pg_result_map">
-          <widget class="QWidget" name="map_result" native="true">
+          <widget class="QWebEngineView" name="wg_map_result" native="true">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -960,19 +934,6 @@ font-weight : bold;</string>
            <property name="styleSheet">
             <string notr="true">background-color : white;</string>
            </property>
-           <widget class="QLabel" name="label_24">
-            <property name="geometry">
-             <rect>
-              <x>320</x>
-              <y>130</y>
-              <width>111</width>
-              <height>41</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>분석 결과 지도</string>
-            </property>
-           </widget>
           </widget>
          </widget>
         </widget>
@@ -1306,6 +1267,14 @@ border-radius : 20%;
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header>qwebengineview.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

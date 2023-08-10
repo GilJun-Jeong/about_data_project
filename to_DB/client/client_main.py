@@ -1,7 +1,6 @@
 import sys
-from socket import *
 from PyQt5.QtGui import QFontDatabase, QFont
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication
 from client_operation import ClientOp
 
 

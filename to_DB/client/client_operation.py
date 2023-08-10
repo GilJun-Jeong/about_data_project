@@ -6,8 +6,22 @@ import json
 import time
 
 from socket import *
-from PyQt5.QtWidgets import QWidget, QApplication, QDialog, QMainWindow
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QObject
+from PyQt5.QtWebChannel import QWebChannel
+from geopy.geocoders import Nominatim
+
 from temp_data import Temp
+
+
+class Communicator(QObject):
+    clicked_location = pyqtSignal(str)
+
+    @pyqtSlot()
+    def send_to_python(self, coords):
+        self.clicked_location.emit(coords)
 
 
 class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
@@ -15,8 +29,12 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         super().__init__()
         self.setupUi(self)
 
+        self.communicator = Communicator()
+        self.channel = QWebChannel()
+        self.channel.registerObject('communicator', self.communicator)
         self.connection()
         self.init_signal()
+        self.init_widget()
 
     def init_signal(self):
         self.pb_start.clicked.connect(self.start)
@@ -35,6 +53,10 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.pb_result_realestate.clicked.connect(self.analysis_real_estate)
         self.pb_return.clicked.connect(self.return_previous)
 
+    def init_widget(self):
+        # self.show_data_map()
+        self.show_scan_map()
+        self.show_map_result()
 
     def connection(self):
         server_ip = '10.10.20.101'
@@ -58,7 +80,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
 
     def _send_packet(self, p):
         packet_length = 1024
-        if self._connected:
+        if self.connected:
             if len(p.encode()) < packet_length:
                 filled_packet = p.ljust(packet_length)
             else:
@@ -95,7 +117,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
 
     def file_receive(self, byte):
         path = './temp_img/' + self.name
-        with open(path,'wb') as file:
+        with open(path, 'wb') as file:
             try:
                 file.write(byte)
                 file.close()
@@ -167,4 +189,99 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.sw_condition.setCurrentWidget(self.pg_scan)
         self.sw_scan.setCurrentWidget(self.pg_all)
 
-    # def scan_map
+    def show_data_map(self):
+        self.wg_data_map.setHtml('''
+                <!DOCTYPE html>
+                <html lang="ko">
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <div id="map" style="width: 380px; height: 380px;"></div>
+                
+                    <script type="text/javascript" 
+                    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=802bea2aa3a8eb460457e73b2078b949">
+                    </script>
+                    <script type="text/javascript">
+                
+                    var container = document.getElementById('map');
+                    var options = {
+                            center: new kakao.maps.LatLng(37.5665, 126.9780),
+                            level: 8
+                    };
+                    var map = new kakao.maps.Map(container, options);
+                    </script>
+                </body>
+                </html>
+                ''')
+
+    def show_scan_map(self):
+        script_key = '802bea2aa3a8eb460457e73b2078b949'
+        url = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey='
+        self.wg_scan_map.page().setWebChannel(self.channel)
+        self.wg_scan_map.setHtml(f'''
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <div id="map" style="width: 340px; height: 340px;"></div>
+                    <script type="text/javascript" 
+                    src="{url}{script_key}"></script>
+                    <script>
+                    var mapContainer = document.getElementById('map'),
+                        mapOptions = {{
+                            center: new kakao.maps.LatLng(37.5665, 126.9780),
+                            level: 8
+                        }};
+                    var map = new kakao.maps.Map(mapContainer, mapOptions);
+                    var marker = new kakao.maps.Marker(); 
+                    marker.setMap(map);
+                    kakao.maps.event.addListener(map, 'click', function(mouseEvent){{
+                            var latlng = mouseEvent.latLng;
+                            marker.setPosition(latlng);
+                            communicator.send_to_python(latlng.getLat() + ',' + latlng.getLng());
+                        }});
+                    </script>
+                </body>
+                </html>
+                ''')
+
+        self.communicator.clicked_location.connect(self.change_geopy)
+
+
+    def show_map_result(self):
+        script_key = '802bea2aa3a8eb460457e73b2078b949'
+        url = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey='
+
+        self.wg_map_result.setHtml(f'''
+                <!DOCTYPE html>
+                <html lang="ko">
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body>
+                    <div id="map" style="width: 720px; height: 300px;"></div>
+
+                    <script type="text/javascript" 
+                    src="{url}{script_key}">
+                    </script>
+                    <script type="text/javascript">
+
+                    var container = document.getElementById('map');
+                    var options = {{
+                            center: new kakao.maps.LatLng(37.5665, 126.9780),
+                            level: 8
+                    }};
+                    var map = new kakao.maps.Map(container, options);
+                    </script>
+                </body>
+                </html>
+                ''')
+
+    def change_geopy(self, coordinate):
+        self.sw_scan.setCurrentWidget(self.pg_location)
+        geolocator = Nominatim(user_agent='bear')
+        location = geolocator.geocode(coordinate)
+        self.le_location.setText(location)
