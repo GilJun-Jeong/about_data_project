@@ -20,6 +20,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.init_signal()
         self.init_widget()
 
+
     def init_signal(self):
         self.pb_start.clicked.connect(self.start)
         self.lb_next.mousePressEvent = self.next_page
@@ -36,6 +37,9 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.pb_scan_location.clicked.connect(self.analysis_location)
         self.pb_result_realestate.clicked.connect(self.analysis_real_estate)
         self.pb_return.clicked.connect(self.return_previous)
+        # self.cb_district_data.currentTextChanged.connect(self.combobox_changed('cb_district_data'))
+        # self.cb_district_all.currentTextChanged.connect(self.combobox_changed('cb_district_all'))
+        # self.cb_district_money.currentTextChanged.connect(self.combobox_changed('cb_district_money'))
 
     def init_widget(self):
         # self.show_data_map()
@@ -49,8 +53,8 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
         try:
             self.client_socket.connect((server_ip, server_port))
-            self.listening_thread = threading.Thread(target=self.check_server_response, daemon=True)
-            self.listening_thread.start()
+            listening_thread = threading.Thread(target=self.check_server_response, daemon=True)
+            listening_thread.start()
             self.connected = True
             self.information['socket'] = [self.client_socket]
             self.information['connect'] = [True]
@@ -77,21 +81,22 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
 
     def check_server_response(self):
         while self.connected:
-            try:
-                response = self.client_socket.recv(int(self.file_size))
-                self._parse_packet(response)
-
-            except Exception as e:
-                pass
+            response = self.client_socket.recv(self.file_size)
+            self._parse_packet(response)
+            print(response)
+            print('receive')
 
     def _parse_packet(self, p):
-
         packet = p.decode('UTF-8').strip()
         parsed = packet.split(self.header_split)
-        command = parsed[0].strip()
+        command = parsed[0]
         try:
-            if command == 'size':
-                self.file_size = packet.split(self.header_split)[1].strip()
+            if command == 'connect':
+                self.information['name'] = parsed[1]
+                print(self.information['name'])
+
+            elif command == 'size':
+                Temp.file_size = int(parsed[1])
 
             elif command == 'disconnect':
                 self.client_socket.close()
@@ -99,11 +104,21 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
                 self.information['connect'] = False
 
             elif command == 'district':
-                self.district = parsed[:1]
-                for district in self.district:
-                    self.cb_district_data.addItem(district)
-                    self.cb_district_all.addItem(district)
-                    self.cb_district_money.addItem(district)
+                self.district = parsed[1:][0].split(self.list_split_1)
+                self.add_district_combobox(self.district)
+
+            elif command == 'local':
+                self.local_list = parsed[1:][0].split(self.list_split_1)
+                self.reset_combobox()
+                self.add_local_combobox(self.local_list)
+
+            elif command == 'data':
+                data_name_list = parsed[1:][0].split(self.list_split_1)
+                self.add_data_combobox(data_name_list)
+
+            elif command == 'scan':
+                data = parsed[1]
+                self.display_scan_data(data)
 
         except:
             self.file_receive(p)
@@ -122,6 +137,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.sw_main.setCurrentWidget(self.pg_data_page)
         self.sw_logo.setCurrentWidget(self.pg_logo_menu)
         self._send_packet('district' + self.header_split)
+        self._send_packet('data' + self.header_split)
 
     def next_page(self, event):
         self.sw_main.setCurrentWidget(self.pg_analysis_page)
@@ -152,6 +168,7 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         district = self.cb_district_data.currentText()
         local = self.cb_local_data.currentText()
         data_type = self.cb_data_type.currentText()
+        self.send_scan(district, local, data_type)
 
     def analysis_all(self):
         district = self.cb_district_all.currentText()
@@ -182,6 +199,38 @@ class ClientOp(QMainWindow, ui.mainUi.Ui_MainWindow, Temp):
         self.sw_result.setCurrentWidget(self.pg_main_scan)
         self.sw_condition.setCurrentWidget(self.pg_scan)
         self.sw_scan.setCurrentWidget(self.pg_all)
+
+    def add_district_combobox(self, district_list):
+        for district in district_list:
+            self.cb_district_data.addItem(district)
+            self.cb_district_all.addItem(district)
+            self.cb_district_money.addItem(district)
+
+    def combobox_changed(self, name):
+        district = eval(f'self.{name}.currentText()')
+        self._send_packet('local' + self.header_split + district)
+
+    def add_local_combobox(self, local_list):
+        for local in local_list:
+            self.cb_local_data.addItem(local)
+            self.cb_local_all.addItem(local)
+            self.cb_local_money.addItemocal_list(local)
+
+    def reset_combobox(self):
+        self.cb_local_data.clear()
+        self.cb_local_all.clear()
+        self.cb_local_money.clear()
+
+    def add_data_combobox(self, name_list):
+        for name in name_list:
+            self.cb_data_type.addItem(name)
+
+    def send_scan(self, district, local, data_type):
+        scan_request = self.list_split_1.join([district, local, data_type])
+        self._send_packet('scan' + self.header_split + scan_request)
+
+    def display_scan_data(self, data):
+        self.li_data.addItem()
 
     def show_data_map(self):
         self.wg_data_map.setHtml('''

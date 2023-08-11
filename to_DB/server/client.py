@@ -1,8 +1,7 @@
 import threading
 import os
-
-from read_db import InteractionToDB
 from temp_data import TempData
+from read_db import InteractionToDB
 
 
 class Client(TempData, InteractionToDB):
@@ -48,17 +47,32 @@ class Client(TempData, InteractionToDB):
             if self._exist:
                 self._exist = False
                 self._client_socket.close()
+                print('disconnect')
 
         elif command == 'file':
             name = parsed[1].strip()
             self.send_file(name)
 
         elif command == 'district':
-            self.get_district()
-            district = self.district_list
-            print(self.district_list)
+            self.district_list = self.get_district()
+            district = self.list_split_1.join(self.district_list)
             self.send_to_client('district' + self.header_split + district)
 
+        elif command == 'local':
+            district = parsed[1].strip()
+            local_list = self.get_local(district)
+            _local = self.list_split_1.join(local_list)
+            self.send_to_client('local' + self.header_split + _local)
+
+        elif command == 'data':
+            data_list = self.list_split_1.join(self.data_list)
+            self.send_to_client('data' + self.header_split + data_list)
+
+        elif command == 'scan':
+            para_list = parsed[1][0].strip()
+            para = self.list_split_1.join(para_list)
+            data = self.data_scan(para)
+            self.send_to_client('scan' + self.header_split + data)
 
     def send_file(self, name):
         path = f'../db/send/{name}'
@@ -77,6 +91,3 @@ class Client(TempData, InteractionToDB):
     def get_file_size(self, path):
         file_size = os.path.getsize(path)
         return str(file_size)
-
-    def get_district(self):
-        data = self.get_gu()

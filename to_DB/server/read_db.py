@@ -3,7 +3,7 @@ import random
 import temp_data
 
 
-class InteractionToDB(temp_data.TempData):
+class InteractionToDB:
     def __init__(self):
         self.conn = None
         self.cur = None
@@ -221,16 +221,42 @@ class InteractionToDB(temp_data.TempData):
     def get_district(self):
         self.connecting()
         self.cur.execute(f"select GU_NAME FROM TB_DONG_AVG", self.conn)
-        select_gu = self.cur.fetchall()
-        select_gu = list(set(select_gu))
-        for i in range(len(select_gu)):
-            select_gu[i] = ''.join(select_gu[i])
-        self.district_list = select_gu
-        # for gu in select_gu:
-        #     self.cur.execute(f"SELECT DONG_NAME from TB_DONG_AVG where GU_NAME = '{gu}'", self.conn)
-        #     select_data = self.cur.fetchall()
-        #     for j in range(len(select_data)):
-        #         select_data[j] = ''.join(select_data[j])
-        #     print(select_data)
+        select_district = self.cur.fetchall()
+        select_district = list(set(select_district))
+        for i in range(len(select_district)):
+            select_district[i] = ''.join(select_district[i])
         self.conn.commit()
         self.conn.close()
+        return select_district
+
+    def get_local(self, district):
+        self.connecting()
+        self.cur.execute(f"SELECT DONG_NAME from TB_DONG_AVG where GU_NAME = '{district}'", self.conn)
+        select_local = self.cur.fetchall()
+        for i in range(len(select_local)):
+            select_local[i] = ''.join(select_local[i])
+        self.conn.commit()
+        self.conn.close()
+
+        return select_local
+
+    def data_scan(self, param_list):
+        district = param_list[0]
+        local = param_list[1]
+        data_type = param_list[2]
+        if data_type == '유동인구':
+            self.connecting()
+            self.cur.execute(f"SELECT AVG_FLOW_POPULATION FROM TB_DONG_AVG WHERE GU_NAME == '{district}' and DONG_NAME == '{local}'")
+            flow_data = self.cur.fetchall
+            return flow_data
+        elif data_type == '평균 매매가':
+            self.connecting()
+            self.cur.execute(f"SELECT AVG_SALES FROM TB_DONG_AVG WHERE GU_NAME == '{district}' and DONG_NAME == '{local}'")
+            sale_data = self.cur.fetchall
+            return sale_data
+        elif data_type == '서브웨이 매장':
+            self.connecting()
+            self.cur.execute(f"SELECT STORE_ID FROM TB_SUBWAY WHERE GU_NAME == '{district}' and DONG_NAME == '{local}'")
+            store_list = self.cur.fetchall
+            store_data = len(store_list)
+            return store_data

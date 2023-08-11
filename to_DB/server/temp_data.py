@@ -7,3 +7,4 @@ class TempData:
     max_clients = 20
     server_port = 9999
     district_list = []
+    data_list = ['유동인구', '평균 매매가', '서브웨이 매장']
